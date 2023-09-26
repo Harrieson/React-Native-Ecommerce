@@ -1,13 +1,34 @@
 import { AntDesign, Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+import axios from 'axios';
 import React, { useState } from 'react';
-import { Image, KeyboardAvoidingView, Pressable, SafeAreaView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Alert, Image, KeyboardAvoidingView, Pressable, SafeAreaView, StyleSheet, Text, TextInput, View } from 'react-native';
 
 const RegisterScreen = () => {
-    const  [email, setEmail] = useState();
-    const  [password, setPassword] = useState();
-    const [name, setName] = useState();
+    const  [email, setEmail] = useState("");
+    const  [password, setPassword] = useState("");
+    const [name, setName] = useState("");
     const navigation = useNavigation();
+
+    const handleRegister =() => {
+        const user = {
+            name: name, password:password, email:email
+        };
+
+        axios.post("http://localhost:8000/register", user).then((response) => {
+            console.log(response);
+            Alert.alert(
+                "registration Successful",
+                "You have registered successfully"
+            );
+
+            setEmail("");
+            setPassword("");
+            setName("");
+        }).catch((error) => {
+            Alert.alert("Registration Failed", error)
+        });
+    };
   return (
     <SafeAreaView style={{flex: 1 , backgroundColor: "white", alignItems: "center"}}>
       <View>
@@ -29,7 +50,7 @@ const RegisterScreen = () => {
                             backgroundColor:"#D0D0D0", paddingVertical:5,
                             borderRadius:10, marginTop:30}}>
                 <MaterialIcons name="email" size={24} color="black" style={{marginLeft:8}} />
-                <TextInput value={email} onChange={(text) => setEmail(text)} 
+                <TextInput value={email} onChangeText={(text) => setEmail(text)} 
                             placeholder='enter your email' style={{color:"gray", marginVertical:10, width:300}} />
             </View>
         </View>
@@ -38,7 +59,7 @@ const RegisterScreen = () => {
                             backgroundColor:"#D0D0D0", paddingVertical:5,
                             borderRadius:10, marginTop:30}}>
                 <Ionicons name="ios-person" size={24} color="black" style={{marginLeft:8}}/>
-                <TextInput value={name} onChange={(text) =>setName(text)} 
+                <TextInput value={name} onChangeText={(text) =>setName(text)} 
                             placeholder='enter your name' style={{color:"gray", marginVertical:10, width:300}} />
             </View>
         </View>
@@ -47,7 +68,7 @@ const RegisterScreen = () => {
                             backgroundColor:"#D0D0D0", paddingVertical:5,
                             borderRadius:10, marginTop:30}}>
                 <AntDesign name="lock1" size={24} color="black" style={{marginLeft:8}}/>
-                <TextInput secureTextEntry={true} value={password} onChange={(text) =>setPassword(text)} 
+                <TextInput secureTextEntry={true} value={password} onChangeText={(text) =>setPassword(text)} 
                             placeholder='enter your password' style={{color:"gray", marginVertical:10, width:300}} />
             </View>
         </View>
@@ -59,12 +80,12 @@ const RegisterScreen = () => {
         <View style={{marginTop:80}} />
 
 
-        <Pressable 
+        <Pressable onPress={handleRegister}
         style={{width:200, backgroundColor:"#FEBE10", 
                 borderRadius: 6, marginLeft: "auto", 
                 marginRight:"auto", padding:15}} >
                 
-                    <Text style={{textAlign:"center", color:"white", fontSize:16, fontWeight:"bold"}}>Login</Text>
+                    <Text style={{textAlign:"center", color:"white", fontSize:16, fontWeight:"bold"}}>Register</Text>
                     
                 </Pressable>
                 <View style={{marginTop:30, flexDirection: "row", justifyContent:"center"}}>

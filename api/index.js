@@ -7,7 +7,7 @@ const cors = require("cors");
 const jwt = require("jsonwebtoken")
 const User = require("./models/user.model")
 const Order = require("./models/oder.model")
-const { GOOGLEPASS,GOOGLEUSER } =require("./.env")
+const { GOOGLEPASS,GOOGLEUSER, MONGO_URL } =require("./.env")
 
 
 const app = express();
@@ -16,13 +16,13 @@ app.use(cors());
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 
-mongoose.connect("mongodb+srv://harrie:Harr1350n@cluster0.6uiej.mongodb.net/react-native-ecom", {
+mongoose.connect(MONGO_URL, {
     useNewUrlParser: true,
     useUnifiedTopology: true
 }). then(() => {
-    console.log(`Conected to Mongo DB`)
+    console.log(`Connected to Mongo DB`)
 }).catch((err) => {
-    console.log(`Error connecting to Mongo DB`)
+    console.log(`Error connecting to Mongo DB`, err)
 })
 
 
@@ -53,7 +53,7 @@ const sendVerificationEmail = async (email, verificationToken) => {
     }
 }
 
-app.post("register", async(req,res) => {
+app.post("/register", async(req, res) => {
     try {
         const {name, email, password} = req.body;
 
@@ -77,10 +77,37 @@ app.post("register", async(req,res) => {
 
 
         //send Verification email to the new user 
+        sendVerificationEmail(newUser.email, newUser.verificationToken);
+        res.status(201).json({
+            message: "Registration successful, Please check your email for verification"
+        })
 
         
     } catch (error) {
         console.log("error registering user", error)
         res.status(500).json({message: "Registration Failed"})
+    }
+})
+
+//Verification endpoint.
+app.get("/verify/:token", async(res, req) => {
+    try {
+        const token = req.params.token;
+
+        const user = await User.findOne({verificationToken: token})
+
+        //Find if the user is verified
+        if(!user) {
+            return res.status(400).json({message:"Invalid verification token"})
+        }
+
+        //Mark user as verified
+        user.verified = true;
+        user.verificationToken = undefined;
+
+        await user.save();
+        res.status(200).json({message: "Email verified successfully"})
+    } catch (error) {
+        res.status(500).json({message: "Email Verification Failed"})
     }
 })
